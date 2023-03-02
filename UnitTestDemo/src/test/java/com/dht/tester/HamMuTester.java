@@ -1,7 +1,10 @@
+package com.dht.tester;
+
 
 import com.dht.services.HamMuService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license

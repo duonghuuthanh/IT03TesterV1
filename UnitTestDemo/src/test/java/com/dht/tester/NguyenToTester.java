@@ -1,3 +1,5 @@
+package com.dht.tester;
+
 
 import com.dht.services.NguyenToService;
 import java.time.Duration;
