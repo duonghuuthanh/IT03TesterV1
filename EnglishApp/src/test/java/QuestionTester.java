@@ -29,6 +29,7 @@ public class QuestionTester {
     // Q3 --> chi lua chon dung
     // Q4 --> bat buoc thuoc danh muc
     private static Connection conn;
+    private static QuestionService s;
     
     @BeforeAll
     public static void beforeAll() {
@@ -37,6 +38,8 @@ public class QuestionTester {
         } catch (SQLException ex) {
             Logger.getLogger(QuestionTester.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        s = new QuestionService();
     }
     
     @AfterAll
@@ -60,8 +63,6 @@ public class QuestionTester {
         choices.add(new Choice("C", false, q.getId()));
         choices.add(new Choice("D", false, q.getId()));
         
-        QuestionService s = new QuestionService();
-        
         PreparedStatement stm = conn.prepareCall("SELECT * FROM question WHERE id=?");
         stm.setString(1, q.getId());
         ResultSet r = stm.executeQuery();
@@ -72,6 +73,40 @@ public class QuestionTester {
             Assertions.assertNotNull(r.next());
             Assertions.assertEquals(r.getString("id"), q.getId());
             Assertions.assertEquals("ABC", r.getString("content"));
+        } catch (SQLException ex) {
+            Logger.getLogger(QuestionTester.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Test
+    public void testSearch() {
+        
+        try {
+            List<Question> questions = s.getQuestions("is");
+            
+            Assertions.assertTrue(!questions.isEmpty());
+            for (Question q: questions)
+                Assertions.assertTrue(q.getContent().contains("is"));
+        } catch (SQLException ex) {
+            Logger.getLogger(QuestionTester.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Test
+    public void testDelete() {
+        String id = "115dd543-06f0-417e-941a-1ec75fde5f64";
+        try {
+            boolean actual = s.deleteQuestion(id);
+            Assertions.assertTrue(actual);
+            
+            PreparedStatement stm = conn.prepareCall("SELECT * FROM question WHERE id=?");
+            stm.setString(1, id);
+            ResultSet r = stm.executeQuery();
+            Assertions.assertFalse(r.next());
+            
+            stm = conn.prepareCall("SELECT * FROM choice WHERE question_id=?");
+            stm.setString(1, id);
+            Assertions.assertFalse(r.next());
         } catch (SQLException ex) {
             Logger.getLogger(QuestionTester.class.getName()).log(Level.SEVERE, null, ex);
         }

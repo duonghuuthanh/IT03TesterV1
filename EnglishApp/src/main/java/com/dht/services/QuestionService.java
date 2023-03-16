@@ -8,7 +8,9 @@ import com.dht.pojo.Choice;
 import com.dht.pojo.Question;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,6 +42,41 @@ public class QuestionService {
             
             conn.commit();
             return r > 0;
+        }
+    }
+    
+    public List<Question> getQuestions(String kw) throws SQLException {
+        List<Question> q = new ArrayList<>();
+        
+        try (Connection conn = JdbcUtils.getConn()) {
+            String sql = "SELECT * FROM question";
+            if (kw != null && !kw.isEmpty())
+                sql += " WHERE content like concat('%', ?, '%')";
+            
+            PreparedStatement stm = conn.prepareCall(sql);
+            if (kw != null && !kw.isEmpty())
+                stm.setString(1, kw);
+            
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Question ques = new Question(rs.getString("id"), 
+                        rs.getString("content"), rs.getInt("category_id"));
+                q.add(ques);
+            }
+        }
+        
+        return q;
+    }
+    
+    public boolean deleteQuestion(String quetionId) throws SQLException {
+        try (Connection conn = JdbcUtils.getConn()) {
+            String sql = "DELETE FROM question WHERE id=?";
+            PreparedStatement stm = conn.prepareCall(sql);
+            stm.setString(1, quetionId);
+            
+            int t = stm.executeUpdate();
+            
+            return t > 0;
         }
     }
 }
